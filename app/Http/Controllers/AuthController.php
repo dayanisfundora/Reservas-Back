@@ -40,7 +40,8 @@ class AuthController extends Controller
             return response()->json(['success' => false, 'message' => 'Su usuario no tiene empresas asignadas. Contacte al administrador.'], 403);
         }
 
-        $token = $user->createToken('api-token')->plainTextToken;
+        $minutes = max(1, (int) config('sanctum.expiration', 15));
+        $token = $user->createToken('api-token', ['*'], now()->addMinutes($minutes))->plainTextToken;
         $user->load('roles');
 
         return response()->json(['success' => true, 'message' => 'Login successful', 'data' => $this->buildAuthPayload($user, $token)]);
