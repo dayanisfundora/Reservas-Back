@@ -62,6 +62,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
         Route::middleware('permission:ver_reservas|gestionar_reservas')->group(function () {
             Route::get('/reservas', [ReservaController::class, 'index']);
+            Route::get('/reservas/proximas-llegadas', [ReservaController::class, 'proximasLlegadas']);
             Route::get('/reservas/disponibilidad', [ReservaController::class, 'disponibilidad']);
             Route::get('/reservas/calendario', [ReservaController::class, 'calendario']);
             Route::get('/reservas/calendario/pdf', [ReservaController::class, 'calendarioPdf']);

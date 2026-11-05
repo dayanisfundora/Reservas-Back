@@ -245,6 +245,54 @@ class ReservaController extends Controller
         ]);
     }
 
+    public function proximasLlegadas(Request $request): JsonResponse
+    {
+        [$casaId] = MovementScopeFilter::resolveFromRequest($request->query('casa_id'));
+
+        if ($casaId === null) {
+            return response()->json([
+                'success' => true,
+                'data' => [],
+            ]);
+        }
+
+        $hoy = Carbon::today()->startOfDay();
+        $manana = $hoy->copy()->addDay();
+
+        $reservas = Reserva::query()
+            ->with(['habitacion'])
+            ->where('casa_id', $casaId)
+            ->whereIn('estado', Reserva::ESTADOS_ACTIVOS)
+            ->whereBetween('fecha_entrada', [$hoy->toDateString(), $manana->toDateString()])
+            ->orderBy('fecha_entrada')
+            ->orderByRaw('CASE WHEN hora_llegada IS NULL THEN 1 ELSE 0 END')
+            ->orderBy('hora_llegada')
+            ->orderBy('id')
+            ->get()
+            ->map(function (Reserva $r) {
+                $summary = $r->toSummaryArray();
+
+                return [
+                    'id' => $summary['id'],
+                    'cliente_nombre' => $summary['cliente_nombre'],
+                    'habitacion_id' => $summary['habitacion_id'],
+                    'habitacion_nombre' => $summary['habitacion']['nombre'] ?? 'Habitación',
+                    'fecha_entrada' => $summary['fecha_entrada'],
+                    'hora_llegada' => $summary['hora_llegada'],
+                    'estado' => $summary['estado'],
+                    'taxi_llegada' => $summary['taxi_llegada'],
+                    'taxi_salida' => $summary['taxi_salida'],
+                    'cantidad_personas' => $summary['cantidad_personas'],
+                ];
+            })
+            ->values();
+
+        return response()->json([
+            'success' => true,
+            'data' => $reservas,
+        ]);
+    }
+
     public function disponibilidad(Request $request): JsonResponse
     {
         $validated = $request->validate([
