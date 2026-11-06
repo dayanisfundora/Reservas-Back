@@ -1,0 +1,55 @@
+﻿RESERVAS - Instrucciones de uso
+===============================
+
+USAR EL SISTEMA
+---------------
+1. Descomprima este .zip en una carpeta de su PC (por ejemplo, en Documentos).
+   No lo ejecute desde dentro del .zip.
+2. Haga doble clic en "Reservas.exe".
+3. Se abrirá el navegador con el sistema. La primera vez tarda un poco más
+   porque prepara la base de datos.
+
+Mientras el sistema está abierto aparece un ícono junto al reloj de Windows.
+Desde ese ícono puede volver a abrir el sistema, editar la configuración,
+reiniciarlo o cerrarlo (opción "Salir"). Cerrar la pestaña del navegador NO
+cierra el sistema.
+
+Al guardar cambios en la configuración, el sistema se reinicia solo.
+
+PRIMER ACCESO
+-------------
+Usuario:     admin
+Contraseña:  Admin12345*
+
+Cambie la contraseña en el primer acceso (menú de usuario > Editar perfil).
+Luego:
+  - En CONFIGURACIÓN > "Gestionar casas", complete los datos de la
+    "Casa principal" (o cree las casas que necesite).
+  - En CONFIGURACIÓN > "Gestionar habitaciones", agregue las habitaciones.
+  - En SEGURIDAD > "Usuarios y roles", cree los usuarios del personal.
+
+REQUISITOS DE LA PC
+-------------------
+- Windows 10 u 11 de 64 bits.
+
+DÓNDE SE GUARDAN LOS DATOS
+--------------------------
+La base de datos y la configuración se guardan en:
+
+    %LOCALAPPDATA%\Reservas
+
+(pegue esa ruta en la barra del Explorador de archivos para abrirla).
+Esa carpeta NO está dentro de la carpeta del programa, así que los datos se
+conservan al actualizar.
+
+ACTUALIZAR A UNA VERSIÓN NUEVA
+------------------------------
+1. Cierre Reservas (ícono junto al reloj > Salir).
+2. Borre la carpeta del programa anterior.
+3. Descomprima la versión nueva y abra "Reservas.exe".
+   La estructura de la base de datos se actualiza sola.
+
+SI ALGO FALLA
+-------------
+Los registros están en %LOCALAPPDATA%\Reservas\logs
+(lanzador.log y mysql.err). Envíelos a soporte técnico.
