@@ -1,11 +1,13 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\BackupController;
 use App\Http\Controllers\CasaController;
 use App\Http\Controllers\EmpresaController;
 use App\Http\Controllers\HabitacionController;
 use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\ReservaController;
+use App\Http\Controllers\ReservaReporteController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UserRoleController;
 use Illuminate\Http\Request;
@@ -20,6 +22,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/auth/profile', [AuthController::class, 'updateProfile']);
     Route::post('/auth/logout', [AuthController::class, 'logout']);
     Route::get('/user', fn (Request $request) => $request->user());
+
+    Route::get('/backup/database', [BackupController::class, 'download'])->middleware('permission:respaldar_bd');
+    Route::post('/backup/restore', [BackupController::class, 'restore'])->middleware('permission:respaldar_bd');
 
     Route::get('/empresas', [EmpresaController::class, 'index']);
     Route::middleware('permission:gestionar_empresas')->group(function () {
@@ -66,6 +71,8 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::get('/reservas/disponibilidad', [ReservaController::class, 'disponibilidad']);
             Route::get('/reservas/calendario', [ReservaController::class, 'calendario']);
             Route::get('/reservas/calendario/pdf', [ReservaController::class, 'calendarioPdf']);
+            Route::get('/reservas/reportes', [ReservaReporteController::class, 'index']);
+            Route::get('/reservas/reportes/pdf', [ReservaReporteController::class, 'pdf']);
         });
         Route::middleware('permission:gestionar_reservas')->group(function () {
             Route::post('/reservas', [ReservaController::class, 'store']);
