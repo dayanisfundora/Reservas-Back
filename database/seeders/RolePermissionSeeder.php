@@ -25,6 +25,7 @@ class RolePermissionSeeder extends Seeder
             'ver_roles', 'crear_roles', 'editar_roles', 'eliminar_roles',
             'ver_permisos', 'asignar_permisos',
             'respaldar_bd',
+            'gestionar_identidad',
         ];
 
         foreach ($permissions as $permission) {

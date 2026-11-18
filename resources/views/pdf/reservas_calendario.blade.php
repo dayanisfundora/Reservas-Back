@@ -15,7 +15,7 @@
             width: 100%;
             border-collapse: collapse;
             margin-bottom: 10px;
-            border-bottom: 2px solid #0f766e;
+            border-bottom: 2px solid #7a1f2b;
             padding-bottom: 6px;
         }
         .header td { vertical-align: bottom; padding: 0; }
@@ -24,7 +24,7 @@
             font-weight: bold;
             letter-spacing: 0.08em;
             text-transform: uppercase;
-            color: #0f766e;
+            color: #7a1f2b;
         }
         .title {
             font-size: 18px;
@@ -66,7 +66,7 @@
             table-layout: fixed;
         }
         .cal th {
-            background: #0f766e;
+            background: #7a1f2b;
             color: #fff;
             font-size: 9px;
             font-weight: bold;
@@ -95,7 +95,7 @@
             margin-bottom: 2px;
         }
         .day-num.today {
-            background: #0f766e;
+            background: #7a1f2b;
             color: #fff;
             border-radius: 50%;
             width: 16px;
@@ -105,7 +105,7 @@
         }
         .pill {
             display: block;
-            border-left: 3px solid #0f766e;
+            border-left: 3px solid #7a1f2b;
             background: #ecfdf5;
             border-radius: 3px;
             padding: 2px 3px;
@@ -122,7 +122,7 @@
         .pill-meta { color: #475569; }
         .more {
             font-size: 7px;
-            color: #0f766e;
+            color: #7a1f2b;
             font-weight: bold;
             margin-top: 1px;
         }
@@ -131,7 +131,7 @@
         .section-title {
             font-size: 12px;
             font-weight: bold;
-            color: #0f766e;
+            color: #7a1f2b;
             margin: 8px 0 5px;
         }
         .card-table {
@@ -141,7 +141,7 @@
         }
         .card-table th {
             background: #f0fdfa;
-            color: #0f766e;
+            color: #7a1f2b;
             border: 1px solid #99f6e4;
             padding: 5px 6px;
             text-align: left;
@@ -167,7 +167,7 @@
         .ok { background: #dcfce7; color: #166534; }
         .warn { background: #ffedd5; color: #9a3412; }
         .pending { background: #ffedd5; color: #9a3412; }
-        .confirmed { background: #ccfbf1; color: #0f766e; }
+        .confirmed { background: #f3ece1; color: #7a1f2b; }
         .room-swatch {
             display: inline-block;
             width: 8px;
@@ -184,7 +184,7 @@
             table-layout: fixed;
         }
         .map th {
-            background: #0f766e;
+            background: #7a1f2b;
             color: #fff;
             font-size: 7px;
             padding: 4px 2px;
@@ -216,7 +216,7 @@
         .map-pill {
             display: block;
             background: #ecfdf5;
-            border-left: 2px solid #0f766e;
+            border-left: 2px solid #7a1f2b;
             border-radius: 2px;
             padding: 1px 2px;
             margin-bottom: 1px;
@@ -280,7 +280,7 @@
     <div class="legend">
         @foreach($habitaciones as $room)
             <span class="legend-item">
-                <span class="legend-dot" style="background: {{ $room['color'] ?? '#0f766e' }};"></span>
+                <span class="legend-dot" style="background: {{ $room['color'] ?? '#7a1f2b' }};"></span>
                 {{ $room['nombre'] ?? 'Habitación' }}
             </span>
         @endforeach
@@ -312,7 +312,7 @@
                             </div>
                             @if($cell['in_month'])
                                 @foreach(array_slice($cell['reservas'], 0, 4) as $r)
-                                    @php $color = $r['habitacion_color'] ?? '#0f766e'; @endphp
+                                    @php $color = $r['habitacion_color'] ?? '#7a1f2b'; @endphp
                                     <div class="pill {{ ($r['estado'] ?? '') === 'pendiente' ? 'pendiente' : '' }}"
                                          style="border-left-color: {{ $color }}; background: {{ ($r['estado'] ?? '') === 'pendiente' ? '#fff7ed' : '#ecfdf5' }};">
                                         <div class="pill-name">
@@ -360,7 +360,7 @@
             @forelse($rows as $r)
                 <tr>
                     <td>
-                        <span class="room-swatch" style="background: {{ $r['habitacion_color'] ?? '#0f766e' }};"></span>
+                        <span class="room-swatch" style="background: {{ $r['habitacion_color'] ?? '#7a1f2b' }};"></span>
                         {{ $r['habitacion_nombre'] ?? '—' }}
                     </td>
                     <td><strong>{{ $r['cliente_nombre'] ?? '—' }}</strong></td>
@@ -408,7 +408,7 @@
             @foreach($habitaciones as $room)
                 <tr>
                     <td class="room">
-                        <span class="room-swatch" style="background: {{ $room['color'] ?? '#0f766e' }};"></span>
+                        <span class="room-swatch" style="background: {{ $room['color'] ?? '#7a1f2b' }};"></span>
                         {{ $room['nombre'] ?? 'Habitación' }}
                     </td>
                     @foreach($days as $day)
@@ -421,7 +421,7 @@
                         <td>
                             @forelse($items as $r)
                                 <div class="map-pill {{ ($r['estado'] ?? '') === 'pendiente' ? 'pendiente' : '' }}"
-                                     style="border-left-color: {{ $room['color'] ?? '#0f766e' }};">
+                                     style="border-left-color: {{ $room['color'] ?? '#7a1f2b' }};">
                                     <strong>{{ \Illuminate\Support\Str::limit($r['cliente_nombre'] ?? '', 10) }}</strong>
                                     {{ $r['cantidad_personas'] ?? 0 }}p
                                     · L{{ !empty($r['taxi_llegada']) ? '✓' : '✗' }}/S{{ !empty($r['taxi_salida']) ? '✓' : '✗' }}
