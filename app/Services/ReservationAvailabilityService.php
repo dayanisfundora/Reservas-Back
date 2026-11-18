@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Models\Casa;
 use App\Models\Habitacion;
 use App\Models\Reserva;
 use Carbon\Carbon;
@@ -86,13 +87,36 @@ class ReservationAvailabilityService
         return $result;
     }
 
-    public function calendar(int $casaId, Carbon $desde, Carbon $hasta): array
+    /**
+     * Calendar grid for one house or all active houses of the current empresa.
+     *
+     * @return array{desde: string, hasta: string, habitaciones: list<array<string, mixed>>}
+     */
+    public function calendar(?int $casaId, Carbon $desde, Carbon $hasta): array
     {
-        $habitaciones = Habitacion::query()->where('casa_id', $casaId)->where('activo', true)->orderBy('nombre')->get();
+        $casas = Casa::query()
+            ->where('activo', true)
+            ->when($casaId !== null, fn ($q) => $q->whereKey($casaId))
+            ->orderBy('nombre')
+            ->get()
+            ->keyBy('id');
+
+        $casaIds = $casas->keys()->map(fn ($id) => (int) $id)->all();
+
+        $habitaciones = Habitacion::query()
+            ->with('casa')
+            ->whereIn('casa_id', $casaIds)
+            ->where('activo', true)
+            ->get()
+            ->sortBy([
+                fn (Habitacion $h) => mb_strtolower((string) ($casas->get($h->casa_id)?->nombre ?? '')),
+                fn (Habitacion $h) => mb_strtolower((string) $h->nombre),
+            ])
+            ->values();
 
         $reservas = Reserva::query()
             ->with('habitacion')
-            ->where('casa_id', $casaId)
+            ->whereIn('casa_id', $casaIds)
             ->whereIn('estado', Reserva::ESTADOS_ACTIVOS)
             ->whereDate('fecha_entrada', '<', $hasta->copy()->addDay()->toDateString())
             ->whereDate('fecha_salida', '>', $desde->toDateString())
@@ -149,7 +173,11 @@ class ReservationAvailabilityService
                 ];
             }
 
-            $rows[] = [...$habitacion->toSummaryArray(), 'dias' => $dayCells];
+            $rows[] = [
+                ...$habitacion->toSummaryArray(),
+                'casa_nombre' => (string) ($casas->get($habitacion->casa_id)?->nombre ?? $habitacion->casa?->nombre ?? ''),
+                'dias' => $dayCells,
+            ];
         }
 
         return ['desde' => $desde->format('Y-m-d'), 'hasta' => $hasta->format('Y-m-d'), 'habitaciones' => $rows];

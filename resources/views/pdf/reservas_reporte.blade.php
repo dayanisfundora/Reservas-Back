@@ -15,7 +15,7 @@
             width: 100%;
             border-collapse: collapse;
             margin-bottom: 10px;
-            border-bottom: 2px solid #0f766e;
+            border-bottom: 2px solid #7a1f2b;
         }
         .header td { vertical-align: bottom; padding: 0 0 6px; }
         .brand {
@@ -23,7 +23,7 @@
             font-weight: bold;
             letter-spacing: 0.08em;
             text-transform: uppercase;
-            color: #0f766e;
+            color: #7a1f2b;
         }
         .title {
             font-size: 17px;
@@ -60,7 +60,7 @@
         .kpi-value {
             font-size: 14px;
             font-weight: bold;
-            color: #0f766e;
+            color: #7a1f2b;
         }
 
         .section-title {
@@ -81,7 +81,7 @@
             margin-bottom: 6px;
         }
         table.data th {
-            background: #0f766e;
+            background: #7a1f2b;
             color: #fff;
             font-size: 8px;
             font-weight: bold;
@@ -100,7 +100,7 @@
         table.data tr.total td {
             background: #ecfdf5;
             font-weight: bold;
-            border-top: 2px solid #0f766e;
+            border-top: 2px solid #7a1f2b;
         }
         .empty {
             padding: 14px;

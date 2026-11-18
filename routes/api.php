@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BackupController;
+use App\Http\Controllers\BrandingController;
 use App\Http\Controllers\CasaController;
 use App\Http\Controllers\EmpresaController;
 use App\Http\Controllers\HabitacionController;
@@ -17,7 +18,12 @@ Route::post('/auth/login', [AuthController::class, 'login']);
 Route::post('/auth/forgot-password', [AuthController::class, 'forgotPassword'])->middleware('throttle:6,1');
 Route::post('/auth/reset-password', [AuthController::class, 'resetPassword'])->middleware('throttle:6,1');
 
+Route::get('/branding', [BrandingController::class, 'show']);
+Route::get('/branding/{type}', [BrandingController::class, 'asset'])->whereIn('type', ['logo', 'favicon']);
+
 Route::middleware('auth:sanctum')->group(function () {
+    Route::post('/branding', [BrandingController::class, 'update'])->middleware('permission:gestionar_identidad');
+
     Route::get('/auth/me', [AuthController::class, 'me']);
     Route::put('/auth/profile', [AuthController::class, 'updateProfile']);
     Route::post('/auth/logout', [AuthController::class, 'logout']);

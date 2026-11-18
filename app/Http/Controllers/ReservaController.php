@@ -351,13 +351,9 @@ class ReservaController extends Controller
             $casaIdParam !== null && $casaIdParam !== '' ? (string) $casaIdParam : null
         );
 
-        if ($casaId === null) {
-            throw ValidationException::withMessages([
-                'casa_id' => ['Debe indicar una casa para el calendario.'],
-            ]);
+        if ($casaId !== null) {
+            Casa::query()->findOrFail($casaId);
         }
-
-        Casa::query()->findOrFail($casaId);
 
         $desde = Carbon::parse($validated['desde'])->startOfDay();
         $hasta = Carbon::parse($validated['hasta'])->startOfDay();
@@ -379,7 +375,7 @@ class ReservaController extends Controller
     public function calendarioPdf(Request $request)
     {
         $validated = $request->validate([
-            'casa_id' => ['required', 'integer', Rule::exists('casas', 'id')],
+            'casa_id' => ['nullable', 'integer', Rule::exists('casas', 'id')],
             'desde' => ['required', 'date'],
             'hasta' => ['required', 'date', 'after_or_equal:desde'],
             'view_mode' => ['nullable', Rule::in(['dia', 'mensual', 'libro'])],
@@ -389,7 +385,15 @@ class ReservaController extends Controller
             'search' => ['nullable', 'string', 'max:120'],
         ]);
 
-        $casaId = (int) $validated['casa_id'];
+        $casaId = isset($validated['casa_id']) ? (int) $validated['casa_id'] : null;
+        $viewMode = (string) ($validated['view_mode'] ?? 'mensual');
+
+        if ($casaId === null && $viewMode === 'mensual') {
+            throw ValidationException::withMessages([
+                'casa_id' => ['Debe indicar una casa para el calendario mensual.'],
+            ]);
+        }
+
         $desde = Carbon::parse($validated['desde'])->startOfDay();
         $hasta = Carbon::parse($validated['hasta'])->startOfDay();
 
@@ -399,7 +403,6 @@ class ReservaController extends Controller
             ]);
         }
 
-        $viewMode = (string) ($validated['view_mode'] ?? 'mensual');
         $selectedDate = isset($validated['selected_date'])
             ? Carbon::parse($validated['selected_date'])->format('Y-m-d')
             : $desde->format('Y-m-d');
@@ -412,16 +415,21 @@ class ReservaController extends Controller
             $habitaciones = $habitaciones->whereIn('id', $selectedRoomIds)->values();
         }
 
+        $multiCasa = $casaId === null;
         $rowsByDay = [];
         foreach ($habitaciones as $room) {
-            $roomColor = (string) ($room['color'] ?? '#0f766e');
+            $roomColor = (string) ($room['color'] ?? '#7a1f2b');
+            $roomLabel = (string) ($room['nombre'] ?? 'Habitacion');
+            if ($multiCasa && ! empty($room['casa_nombre'])) {
+                $roomLabel = $room['casa_nombre'] . ' · ' . $roomLabel;
+            }
             foreach (($room['dias'] ?? []) as $cell) {
                 $day = (string) ($cell['fecha'] ?? '');
                 foreach (($cell['reservas'] ?? []) as $reserva) {
                     $rowsByDay[$day][$reserva['id']] = [
                         ...$reserva,
                         'habitacion_id' => $room['id'] ?? null,
-                        'habitacion_nombre' => $room['nombre'] ?? 'Habitacion',
+                        'habitacion_nombre' => $roomLabel,
                         'habitacion_color' => $roomColor,
                     ];
                 }
@@ -468,7 +476,7 @@ class ReservaController extends Controller
             $weeks[] = $week;
         }
 
-        $casa = Casa::query()->find($casaId);
+        $casa = $casaId !== null ? Casa::query()->find($casaId) : null;
         $titleView = match ($viewMode) {
             'dia' => 'Día',
             'libro' => 'Mapa',
@@ -477,7 +485,7 @@ class ReservaController extends Controller
         $monthLabel = $desde->locale('es')->translatedFormat('F Y');
 
         $pdf = PDF::loadView('pdf.reservas_calendario', [
-            'casaNombre' => $casa?->nombre ?? 'Casa',
+            'casaNombre' => $casa?->nombre ?? 'Todas las casas',
             'desde' => $desde->format('Y-m-d'),
             'hasta' => $hasta->format('Y-m-d'),
             'selectedDate' => $selectedDate,
