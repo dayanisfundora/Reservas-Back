@@ -108,10 +108,9 @@ class ReservationAvailabilityService
             ->whereIn('casa_id', $casaIds)
             ->where('activo', true)
             ->get()
-            ->sortBy([
-                fn (Habitacion $h) => mb_strtolower((string) ($casas->get($h->casa_id)?->nombre ?? '')),
-                fn (Habitacion $h) => mb_strtolower((string) $h->nombre),
-            ])
+            ->groupBy('casa_id')
+            ->sortBy(fn ($group, $id) => mb_strtolower((string) ($casas->get((int) $id)?->nombre ?? '')))
+            ->flatMap(fn ($group) => Habitacion::sortForDisplay($group))
             ->values();
 
         $reservas = Reserva::query()

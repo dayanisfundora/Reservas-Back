@@ -17,14 +17,16 @@ class HabitacionController extends Controller
     public function index(Request $request): JsonResponse
     {
         [$casaId] = MovementScopeFilter::resolveFromRequest($request->query('casa_id'));
-        $query = Habitacion::query()->with('casa')->orderBy('nombre');
+        $query = Habitacion::query()->with('casa');
         if ($casaId !== null) {
             $query->where('casa_id', $casaId);
         }
         if ($request->boolean('solo_activas', false)) {
             $query->where('activo', true);
         }
-        $habitaciones = $query->get()->map(fn (Habitacion $h) => $h->toSummaryArray())->values();
+        $habitaciones = Habitacion::sortForDisplay($query->get())
+            ->map(fn (Habitacion $h) => $h->toSummaryArray())
+            ->values();
         return response()->json(['success' => true, 'data' => $habitaciones]);
     }
 

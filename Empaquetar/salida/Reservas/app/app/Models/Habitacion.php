@@ -66,4 +66,45 @@ class Habitacion extends Model
             'casa' => $this->relationLoaded('casa') && $this->casa ? $this->casa->toSummaryArray() : null,
         ];
     }
+
+    /**
+     * First integer found in the room name (e.g. "Hab 10" → 10).
+     */
+    public static function sortNumberFromNombre(?string $nombre): ?int
+    {
+        if ($nombre === null || $nombre === '') {
+            return null;
+        }
+
+        if (preg_match('/\d+/', $nombre, $matches) !== 1) {
+            return null;
+        }
+
+        return (int) $matches[0];
+    }
+
+    /**
+     * Display order: numeric by name when present, otherwise creation order (id).
+     *
+     * @param  iterable<int, self>  $habitaciones
+     * @return \Illuminate\Support\Collection<int, self>
+     */
+    public static function sortForDisplay(iterable $habitaciones): \Illuminate\Support\Collection
+    {
+        return collect($habitaciones)
+            ->sort(function (self $a, self $b): int {
+                $numA = self::sortNumberFromNombre($a->nombre);
+                $numB = self::sortNumberFromNombre($b->nombre);
+
+                $keyA = $numA ?? PHP_INT_MAX;
+                $keyB = $numB ?? PHP_INT_MAX;
+
+                if ($keyA !== $keyB) {
+                    return $keyA <=> $keyB;
+                }
+
+                return ((int) $a->id) <=> ((int) $b->id);
+            })
+            ->values();
+    }
 }
