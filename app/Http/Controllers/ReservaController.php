@@ -249,48 +249,66 @@ class ReservaController extends Controller
     {
         [$casaId] = MovementScopeFilter::resolveFromRequest($request->query('casa_id'));
 
-        if ($casaId === null) {
-            return response()->json([
-                'success' => true,
-                'data' => [],
-            ]);
-        }
-
         $hoy = Carbon::today()->startOfDay();
         $manana = $hoy->copy()->addDay();
+        $rango = [$hoy->toDateString(), $manana->toDateString()];
 
-        $reservas = Reserva::query()
-            ->with(['habitacion'])
-            ->where('casa_id', $casaId)
-            ->whereIn('estado', Reserva::ESTADOS_ACTIVOS)
-            ->whereBetween('fecha_entrada', [$hoy->toDateString(), $manana->toDateString()])
+        $base = Reserva::query()
+            ->with(['habitacion', 'casa'])
+            ->whereIn('estado', Reserva::ESTADOS_ACTIVOS);
+
+        if ($casaId !== null) {
+            $base->where('casa_id', $casaId);
+        }
+
+        $entradas = $base->clone()
+            ->whereBetween('fecha_entrada', $rango)
             ->orderBy('fecha_entrada')
             ->orderByRaw('CASE WHEN hora_llegada IS NULL THEN 1 ELSE 0 END')
             ->orderBy('hora_llegada')
             ->orderBy('id')
             ->get()
-            ->map(function (Reserva $r) {
-                $summary = $r->toSummaryArray();
+            ->map(fn (Reserva $r) => $this->mapProximasRecepcionItem($r, 'entrada'));
 
-                return [
-                    'id' => $summary['id'],
-                    'cliente_nombre' => $summary['cliente_nombre'],
-                    'habitacion_id' => $summary['habitacion_id'],
-                    'habitacion_nombre' => $summary['habitacion']['nombre'] ?? 'Habitación',
-                    'fecha_entrada' => $summary['fecha_entrada'],
-                    'hora_llegada' => $summary['hora_llegada'],
-                    'estado' => $summary['estado'],
-                    'taxi_llegada' => $summary['taxi_llegada'],
-                    'taxi_salida' => $summary['taxi_salida'],
-                    'cantidad_personas' => $summary['cantidad_personas'],
-                ];
-            })
-            ->values();
+        $salidas = $base->clone()
+            ->whereBetween('fecha_salida', $rango)
+            ->orderBy('fecha_salida')
+            ->orderBy('id')
+            ->get()
+            ->map(fn (Reserva $r) => $this->mapProximasRecepcionItem($r, 'salida'));
 
         return response()->json([
             'success' => true,
-            'data' => $reservas,
+            'data' => $entradas->concat($salidas)->values(),
         ]);
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function mapProximasRecepcionItem(Reserva $reserva, string $tipo): array
+    {
+        $summary = $reserva->toSummaryArray();
+        $esSalida = $tipo === 'salida';
+
+        return [
+            'id' => $summary['id'],
+            'tipo' => $esSalida ? 'salida' : 'entrada',
+            'cliente_nombre' => $summary['cliente_nombre'],
+            'casa_id' => $summary['casa_id'],
+            'casa_nombre' => $summary['casa']['nombre'] ?? null,
+            'habitacion_id' => $summary['habitacion_id'],
+            'habitacion_nombre' => $summary['habitacion']['nombre'] ?? 'Habitación',
+            'fecha_entrada' => $summary['fecha_entrada'],
+            'fecha_salida' => $summary['fecha_salida'],
+            'fecha_evento' => $esSalida ? $summary['fecha_salida'] : $summary['fecha_entrada'],
+            'hora_llegada' => $summary['hora_llegada'],
+            'hora_evento' => $esSalida ? null : $summary['hora_llegada'],
+            'estado' => $summary['estado'],
+            'taxi_llegada' => $summary['taxi_llegada'],
+            'taxi_salida' => $summary['taxi_salida'],
+            'cantidad_personas' => $summary['cantidad_personas'],
+        ];
     }
 
     public function disponibilidad(Request $request): JsonResponse
